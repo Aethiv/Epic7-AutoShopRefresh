@@ -1,48 +1,87 @@
 import cv2 as cv
 from time import time
+from time import sleep
 from windowcapture import WindowCapture
 from detection import Detection
-from time import time
-from refresh import Refresh
+from shop import Shop
 
 
 # initialize the WindowCapture class
-wincap = WindowCapture('BlueStacks App Player')
-cwindow = Refresh(wincap.get_screen_position((0,0)))
-# initialize the Vision class
+wincap = WindowCapture('LDPlayer')
+cwindow = Shop(wincap.get_screen_position((0,0)), wincap.get_width(), wincap.get_height())
+
+# initialize Class
 detection_cov = Detection('resources/cov.jpg')
 detection_myst = Detection('resources/myst.jpg')
+detection_refresh = Detection('resources/refresh.jpg')
+detection_confirm = Detection('resources/confirm.jpg')
+detection_buy1 = Detection('resources/buy.jpg')
+detection_buy_cov = Detection('resources/buy_cov.jpg')
+detection_buy_myst = Detection('resources/buy_myst.jpg')
 
-loop_time = time()
-scrolled = False
+x = '1'
+cov_bought = False
+myst_bought = False
+
+cov_count = 0
+myst_count = 0
+
 while(True):
-
+    sleep(1)
     # get an updated image of the game
     screenshot = wincap.get_screenshot()
 
-    # display the processed image
-    cov_points = detection_cov.find(screenshot, 0.95, 'rectangles')
-    myst_points = detection_myst.find(screenshot, 0.95, 'rectangles')
+    # Look for the bookmarks
+    if cov_bought == False:
+        cov_points = detection_cov.find(screenshot, 0.80, 'rectangles')
+    else:
+        cov_points = []
+
+    if myst_bought == False:
+        myst_points = detection_myst.find(screenshot, 0.80, 'rectangles')
+    else:
+        myst_points = []
 
     points = cov_points + myst_points
-
-    if not any(points):
-        if not scrolled:
+    
+   
+    
+    if any(points) and x != 'xd1':        
+        x = 'xd'
+    
+    match x:
+        case '1':
             cwindow.scroll()
-            scrolled = True
-            print('test1')
-        else:
-            cwindow.ref()
-            scrolled = False
-            print('test2')
-    else:
-        for point in points:
-            cwindow.buy(wincap.get_screen_position(point))
-        
-        
-
-    print('FPS {}'.format(1 / (time() - loop_time)))
-    loop_time = time()
+            x = '2'
+        case '2':
+            ref_point = detection_refresh.find(screenshot, 0.95, 'rectangles')
+            cwindow.click_here(ref_point)
+            x = '3'
+        case '3':
+            conf_point = detection_confirm.find(screenshot, 0.90, 'rectangles')
+            cwindow.click_here(conf_point)
+            cov_bought = False
+            myst_bought = False
+            x = '1'
+        case 'xd':
+            buy1_points = detection_buy1.find(screenshot, 0.95, 'points')
+            cwindow.click_here(cwindow.find_closest(points[0], buy1_points))
+            x = 'xd1'
+        case 'xd1':
+            buy_cov_point = detection_buy_cov.find(screenshot, 0.95, 'points')
+            buy_myst_point = detection_buy_myst.find(screenshot, 0.95, 'points')
+            if any(buy_cov_point):
+                cwindow.click_here(buy_cov_point)
+                cov_bought = True
+                cov_count += 1
+            elif any(buy_myst_point):
+                cwindow.click_here(buy_myst_point)
+                myst_bought = True
+                myst_count += 1
+            x = '1'
+    
+    print('myst bought: ', myst_count)
+    print('cov bought: ', cov_count)   
     # press 'q' with the output window focused to exit.
     # waits 1 ms every loop to process key presses
     if cv.waitKey(1) == ord('q'):

@@ -21,7 +21,7 @@ class WindowCapture:
         # find the handle for the window we want to capture
         self.hwnd = win32gui.FindWindow(None, window_name)
         if not self.hwnd:
-            raise Exception('Turn on bluestacks lmao {}'.format(window_name))
+            raise Exception('You might want to turn on the game {}'.format(window_name))
 
         # get the window size
         window_rect = win32gui.GetWindowRect(self.hwnd)
@@ -80,3 +80,9 @@ class WindowCapture:
         
     def get_screen_position(self, pos):
         return (pos[0] + self.offset_x, pos[1] + self.offset_y)
+    
+    def get_width(self):
+        return self.w
+    
+    def get_height(self):
+        return self.h
