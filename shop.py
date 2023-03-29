@@ -1,6 +1,7 @@
 import pyautogui
 import math
 from time import sleep
+import random
 
 class Shop:
 
@@ -26,6 +27,10 @@ class Shop:
     def click_here(self, point):
         
         x,y = point[0]
+        
+        x += random.randrange(-7, 7)
+        y += random.randrange(-15, 15)
+        
         pyautogui.moveTo(self.base_x + x,self.base_y + y)
         pyautogui.click()
 
