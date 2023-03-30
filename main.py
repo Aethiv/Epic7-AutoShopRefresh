@@ -25,6 +25,7 @@ myst_bought = False
 cov_count = 0
 myst_count = 0
 
+# CHANGE TO HOW MANY SKYSTONES YOU WANT TO USE
 skystones_count = 2000
 
 while(skystones_count > 0):
